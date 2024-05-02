@@ -5206,7 +5206,7 @@ class DXXProgram(DXXCommon):
 			if user_settings.editor:
 				exe_target += '-editor'
 		env = self.env
-		PROGSUFFIX = env['PROGSUFFIX']
+		PROGSUFFIX = ".dll" #env['PROGSUFFIX']
 		if PROGSUFFIX and not exe_target.endswith(PROGSUFFIX):
 			exe_target += PROGSUFFIX
 		exe_target = self.builddir.File(exe_target)
@@ -5310,7 +5310,7 @@ class DXXProgram(DXXCommon):
 			Depends(versid_obj, objects)
 		objects.append(versid_obj)
 		# finally building program...
-		return env.Program(target=exe_target, source = objects)
+		return env.SharedLibrary(target=exe_target, source = objects, LIBPATH = ['C:/lib',])# 'C:/dev/hdr/SDL-uwp-gl/VisualC-WinRT/x64/Release/SDL-UWP', '/mingw64/lib'])
 
 	def _show_build_failure_summary():
 		build_failures = SCons.Script.GetBuildFailures()

@@ -452,8 +452,8 @@ class ConfigureTests(_ConfigureTests):
 					'CPPDEFINES': [['main', 'SDL_main']],
 					'CPPPATH': ['C:/dev/hdr/SDL-uwp-gl/include'],
 					'LIBPATH': ['C:/dev/hdr/SDL-uwp-gl/VisualC-WinRT/x64/Release/SDL-UWP'],
-					'LIBS': ['mingw32','SDL2', "SDL2main"],
-                    'LINKFLAGS': ['-mwindows', '-LC:/dev/hdr/SDL-uwp-gl/VisualC-WinRT/x64/Release/SDL-UWP']
+					'LIBS': ['mingw32','SDL2'],
+					'LINKFLAGS': ['-mwindows']
 				}
 
 			_cache[cmd] = flags
@@ -1643,7 +1643,7 @@ static void terminate_handler()
 		self._check_system_library(context, header=['OpenGL/glu.h' if self.user_settings.host_platform == 'darwin' else 'GL/glu.h'], main='''
 	gluPerspective(90.0,1.0,0.1,5000.0);
 	gluBuild2DMipmaps (GL_TEXTURE_2D, 0, 1, 1, 1, GL_UNSIGNED_BYTE, nullptr);
-''', lib=ogllibs, testflags={'LIBS': ogllibs})
+	''', lib=ogllibs, testflags={'LIBS': ogllibs})
 
 	@_custom_test
 	def _check_SDL(self,context):
@@ -4078,7 +4078,7 @@ class DXXCommon(LazyObjectConstructor):
 		def adjust_environment(self,program,env):
 			env.Append(
 				CPPDEFINES = ['_WIN32', 'WIN32_LEAN_AND_MEAN'],
-				LINKFLAGS = ['-mwindows'],
+				LINKFLAGS = ['-mwindows', '-L../libs'],
 			)
 	class DarwinPlatformSettings(_PlatformSettings):
 		# Darwin targets include Objective-C (not Objective-C++) code to
@@ -5246,7 +5246,7 @@ class DXXProgram(DXXCommon):
 			objects.extend(self.get_objects_similar_arch_sdlmixer())
 		if user_settings.opengl or user_settings.opengles:
 			env.Append(LIBS = self.platform_settings.ogllibs)
-			env.Prepend(LIBPATH = 'C:/lib')
+			env.Append(LIBPATH = 'C:\\lib')
 			static_objects_arch = static_archive_construction.get_objects_arch_ogl
 			objects_similar_arch = self.get_objects_similar_arch_ogl
 		else:

@@ -444,6 +444,18 @@ class ConfigureTests(_ConfigureTests):
 				except OSError as o:
 					Display(f'''{message}: failed with error {repr(o.message) if o.errno is None else f'{o.errno} ("{o.strerror}")'}; using default flags for {pkgconfig_name!r}: {guess_flags!r}\n''')
 					flags = guess_flags
+
+			# TODO: Cleaner way of doing this?
+			# Override SDL2 with SDL-UWP build
+			if display_name == 'SDL2':
+				flags = {
+					'CPPDEFINES': [['main', 'SDL_main']],
+					'CPPPATH': ['C:/dev/hdr/SDL-uwp-gl/include'],
+					'LIBPATH': ['C:/dev/hdr/SDL-uwp-gl/VisualC-WinRT/x64/Release/SDL-UWP'],
+					'LIBS': ['mingw32','SDL2', "SDL2main"],
+                    'LINKFLAGS': ['-mwindows', '-LC:/dev/hdr/SDL-uwp-gl/VisualC-WinRT/x64/Release/SDL-UWP']
+				}
+
 			_cache[cmd] = flags
 			return flags
 
@@ -5234,6 +5246,7 @@ class DXXProgram(DXXCommon):
 			objects.extend(self.get_objects_similar_arch_sdlmixer())
 		if user_settings.opengl or user_settings.opengles:
 			env.Append(LIBS = self.platform_settings.ogllibs)
+			env.Prepend(LIBPATH = 'C:/lib')
 			static_objects_arch = static_archive_construction.get_objects_arch_ogl
 			objects_similar_arch = self.get_objects_similar_arch_ogl
 		else:
@@ -5310,7 +5323,7 @@ class DXXProgram(DXXCommon):
 			Depends(versid_obj, objects)
 		objects.append(versid_obj)
 		# finally building program...
-		return env.SharedLibrary(target=exe_target, source = objects, LIBPATH = ['C:/lib',])# 'C:/dev/hdr/SDL-uwp-gl/VisualC-WinRT/x64/Release/SDL-UWP', '/mingw64/lib'])
+		return env.SharedLibrary(target=exe_target, source = objects)
 
 	def _show_build_failure_summary():
 		build_failures = SCons.Script.GetBuildFailures()

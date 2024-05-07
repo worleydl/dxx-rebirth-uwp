@@ -29,7 +29,12 @@ static void display_win32_alert(const char *message, int error)
 	if (fullscreen)
 		gr_toggle_fullscreen();
 
-	MessageBox(NULL, message, error?"Sorry, a critical error has occurred.":"Attention!", error?MB_OK|MB_ICONERROR:MB_OK|MB_ICONWARNING);
+	//MessageBox(NULL, message, error?"Sorry, a critical error has occurred.":"Attention!", error?MB_OK|MB_ICONERROR:MB_OK|MB_ICONWARNING);
+	
+	// Junk code to make compiler happy for now
+	if (sizeof(message) < 0) {
+		return;
+	}
 
 	if (const auto wind = window_get_front())
 		wind->send_event(d_event{event_type::window_activated});

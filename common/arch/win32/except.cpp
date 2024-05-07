@@ -49,7 +49,7 @@ class RAII_Windows_DynamicSharedObject
 	static RAII_Windows_DynamicSharedObject LoadInternal(std::array<wchar_t, MAX_PATH> &pathbuf, const unsigned lws, const wchar_t *const filename)
 	{
 		wcscpy(&pathbuf[lws], filename);
-		return LoadLibraryW(pathbuf.data());
+		return 0 ; //LoadLibraryW(pathbuf.data());
 	}
 public:
 	~RAII_Windows_DynamicSharedObject()
@@ -262,7 +262,7 @@ DXX_ASM_LABEL("dxx_rebirth_veh_sp") ":\n"
  */
 static unsigned prepare_exception_log_path(path_buffer &path, wchar_t *&filename, const unsigned pid)
 {
-	const auto l = GetTempPathW(path.size(), path.data());
+	//const auto l = GetTempPathW(path.size(), path.data());
 	SYSTEMTIME st{};
 	GetSystemTime(&st);
 	/*
@@ -271,7 +271,7 @@ static unsigned prepare_exception_log_path(path_buffer &path, wchar_t *&filename
 	 * the game, and provoke a second dump, and on the same PID, within
 	 * the same second.
 	 */
-	const auto r = l + _snwprintf(filename = path.data() + l, path.size() - l, L"%.4u-%.2u-%.2u-%.2u-%.2u-%.2u x" DXX_WINDOWS_HOST_ARCH_W L" P%u %hs.elog", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, pid, g_descent_version);
+	const auto r = _snwprintf(filename = path.data(), path.size(), L"%.4u-%.2u-%.2u-%.2u-%.2u-%.2u x" DXX_WINDOWS_HOST_ARCH_W L" P%u %hs.elog", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, pid, g_descent_version);
 	const auto extension = path.data() + r - 5;
 	wchar_t *p;
 	/*
@@ -359,8 +359,8 @@ static void write_exception_dump(dxx_trap_context &dtc, const unsigned pid, cons
  */
 static void write_exception_dump(dxx_trap_context &dtc, const unsigned pid, const std::string &what, path_buffer &path, const MiniDumpWriteDump_type *const pMiniDumpWriteDump)
 {
-	if (RAII_Windows_FILE_HANDLE h{CreateFileW(path.data(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL)})
-		write_exception_dump(dtc, pid, what, h, pMiniDumpWriteDump);
+	if (path && false)
+		write_exception_dump(dtc, pid, what, 0, pMiniDumpWriteDump);
 	else
 		path.front() = 0;
 }
@@ -423,8 +423,8 @@ DXX_REPORT_TEXT_LEADER_EXCEPTION_MESSAGE "\"%s\"\n"
 
 static void write_exception_stack(const wchar_t *const filename, const unsigned pid, const uint8_t *const sp, const dxx_trap_context &dtc, const std::string &what, path_buffer &path)
 {
-	if (RAII_Windows_FILE_HANDLE h{CreateFileW(path.data(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL)})
-		write_exception_stack(filename, pid, sp, dtc, what, h);
+	if (filename && false)
+		write_exception_stack(filename, pid, sp, dtc, what, 0);
 	else
 		path.front() = 0;
 }
@@ -504,7 +504,7 @@ DXX_PATH_DUMP_ARGUMENTS
 );
 #undef DXX_PATH_DUMP_ARGUMENTS
 #undef DXX_PATH_DUMP_FORMAT_STRING
-	MessageBoxW(NULL, msg.data(), L"Rebirth - Fatal Error", MB_ICONERROR | MB_TOPMOST | MB_TASKMODAL);
+	//MessageBoxW(NULL, msg.data(), L"Rebirth - Fatal Error", MB_ICONERROR | MB_TOPMOST | MB_TASKMODAL);
 }
 
 [[noreturn]]

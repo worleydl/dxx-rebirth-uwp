@@ -20,7 +20,6 @@
 #endif
 #if defined(__APPLE__) && defined(__MACH__)
 #include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
 #else
 #if DXX_USE_OGLES
 #include <GLES/gl.h>
@@ -1292,7 +1291,6 @@ void ogl_start_frame(grs_canvas &canvas)
 #if DXX_USE_OGLES
 	perspective(90.0,1.0,0.1,5000.0);   
 #else
-	gluPerspective(90.0,1.0,0.1,5000.0);
 #endif
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();//clear matrix
@@ -1837,11 +1835,6 @@ static int ogl_loadtexture(const palette_array_t &pal, const uint8_t *data, cons
 #else
 	if (buildmipmap)
 	{
-		gluBuild2DMipmaps (
-				GL_TEXTURE_2D, tex.internalformat, 
-				tex.tw * rescale, tex.th * rescale, tex.format,
-				GL_UNSIGNED_BYTE, 
-				outP);
 	}
 	else
 #endif

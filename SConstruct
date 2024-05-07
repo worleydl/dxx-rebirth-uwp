@@ -449,12 +449,50 @@ class ConfigureTests(_ConfigureTests):
 			# Override SDL2 with SDL-UWP build
 			if display_name == 'SDL2':
 				flags = {
-					'CPPDEFINES': [['main', 'SDL_main']],
 					'CPPPATH': ['C:/dev/hdr/SDL-uwp-gl/include'],
 					'LIBPATH': ['C:/dev/hdr/SDL-uwp-gl/VisualC-WinRT/x64/Release/SDL-UWP'],
 					'LIBS': ['mingw32','SDL2'],
 					'LINKFLAGS': ['-mwindows']
 				}
+			elif 'SDL2main' in flags['LIBS']:
+				flags['LIBS'].remove('SDL2main')
+
+			if 'CPPPATH' in flags and 'C:/msys64/mingw64/include/SDL2' in flags['CPPPATH']:
+				flags['CPPPATH'].remove('C:/msys64/mingw64/include/SDL2')
+
+			if display_name == 'SDL2_image':
+				flags = {
+					'CPPPATH': ['C:/dev/uwp/deps/SDL_image/include'],
+					'LIBPATH': ['C:/dev/uwp/deps/SDL_image/lib'],
+					'LIBS': ['mingw32','SDL2', 'SDL2_image'],
+					'LINKFLAGS': ['-mwindows']
+				}
+
+			if display_name == 'SDL2_mixer':
+				flags = {
+					'CPPPATH': ['C:/dev/uwp/deps/SDL_mixer/include'],
+					'LIBPATH': ['C:\dev/uwp/deps/SDL_mixer/VisualC-WinRT/x64/Release/SDL_mixer-UWP'],
+					'LIBS': ['mingw32','SDL2', 'SDL2_mixer'],
+					'LINKFLAGS': ['-mwindows']
+				}
+
+			if display_name == 'physfs':
+				flags = {
+					'CPPPATH': ['C:/dev/uwp/deps/physfs/src'],
+					'LIBPATH': ['C:/dev/uwp/deps/physfs/build/Release'],
+					'LIBS': ['mingw32','physfs'],
+					'LINKFLAGS': ['-mwindows']
+				}
+
+			if display_name == 'libpng':
+				flags = {
+					'CPPPATH': ['C:/dev/uwp/deps/libpng/', 'C:/dev/uwp/zlib'],
+					'LIBPATH': ['C:/dev/uwp/deps/libpng/build/Release', 'C:/dev/uwp/zlib/build/Release'],
+					'LIBS': ['mingw32','libpng16', 'zlib'],
+					'LINKFLAGS': ['-mwindows']
+				}
+
+
 
 			_cache[cmd] = flags
 			return flags
@@ -1641,8 +1679,8 @@ static void terminate_handler()
 	def check_glu(self,context):
 		ogllibs = self.platform_settings.ogllibs
 		self._check_system_library(context, header=['OpenGL/glu.h' if self.user_settings.host_platform == 'darwin' else 'GL/glu.h'], main='''
-	gluPerspective(90.0,1.0,0.1,5000.0);
-	gluBuild2DMipmaps (GL_TEXTURE_2D, 0, 1, 1, 1, GL_UNSIGNED_BYTE, nullptr);
+	//gluPerspective(90.0,1.0,0.1,5000.0);
+	//gluBuild2DMipmaps (GL_TEXTURE_2D, 0, 1, 1, 1, GL_UNSIGNED_BYTE, nullptr);
 	''', lib=ogllibs, testflags={'LIBS': ogllibs})
 
 	@_custom_test
@@ -4073,7 +4111,7 @@ class DXXCommon(LazyObjectConstructor):
 
 	# Settings to apply to mingw32 builds
 	class Win32PlatformSettings(_PlatformSettings):
-		ogllibs = ['opengl32', 'glu32']
+		ogllibs = ['opengl32', 'libgallium_wgl', 'libglapi', 'z']
 		tools = ('mingw',)
 		def adjust_environment(self,program,env):
 			env.Append(

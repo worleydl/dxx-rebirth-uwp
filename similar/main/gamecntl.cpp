@@ -1026,7 +1026,7 @@ static window_event_result HandleSystemKey(int key)
 			if (CGameCfg.MusicType == music_type::Redbook)
 			{
 				songs_stop_all();
-				RBAEjectDisk();
+				//RBAEjectDisk();
 			}
 #endif
 			break;

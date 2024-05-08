@@ -464,7 +464,7 @@ class ConfigureTests(_ConfigureTests):
 				flags = {
 					'CPPPATH': ['C:/dev/uwp/deps/SDL_image/include'],
 					'LIBPATH': ['C:/dev/uwp/deps/SDL_image/lib'],
-					'LIBS': ['mingw32','SDL2', 'SDL2_image'],
+					'LIBS': ['mingw32','SDL2', 'SDL_image'],
 					'LINKFLAGS': ['-mwindows']
 				}
 
@@ -4116,7 +4116,7 @@ class DXXCommon(LazyObjectConstructor):
 		def adjust_environment(self,program,env):
 			env.Append(
 				CPPDEFINES = ['_WIN32', 'WIN32_LEAN_AND_MEAN'],
-				LINKFLAGS = ['-mwindows', '-L../libs'],
+				LINKFLAGS = ['-mwindows', '-static', '-L../libs',],
 			)
 	class DarwinPlatformSettings(_PlatformSettings):
 		# Darwin targets include Objective-C (not Objective-C++) code to
@@ -4822,7 +4822,7 @@ class DXXArchive(DXXCommon):
 'common/arch/win32/rbaudio.cpp',
 ))
 		def get_platform_objects(self):
-			result = self.__get_platform_objects()
+			result = [] # self.__get_platform_objects()
 			if self.user_settings.sdl2:
 				result += self.__get_sdl2_objects()
 			return result

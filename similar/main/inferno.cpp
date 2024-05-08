@@ -786,8 +786,8 @@ int main(int argc, char *argv[])
 	prctl(PR_SET_UNALIGN, PR_UNALIGN_NOPRINT, 0, 0, 0);
 #endif
 #ifdef WIN32
-	void d_set_exception_handler();
-	d_set_exception_handler();
+	//void d_set_exception_handler();
+	//d_set_exception_handler();
 #endif
 	return dsx::main(argc, argv);
 }

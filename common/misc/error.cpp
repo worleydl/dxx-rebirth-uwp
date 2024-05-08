@@ -46,7 +46,7 @@ static void warn_printf(const std::span<const char> s)
 #if DXX_USE_EDITOR
 static void (*warn_func)(std::span<const char> s) =
 #if defined(WIN32) || defined(__APPLE__) || defined(__MACH__)
-	msgbox_warning
+	warn_printf //msgbox_warning
 #else
 	warn_printf
 #endif
@@ -74,15 +74,16 @@ namespace {
 static void print_exit_message(const std::span<const char> exit_message)
 {
 	con_puts(CON_CRITICAL, exit_message);
-	msgbox_error(exit_message.data());
+	//msgbox_error(exit_message.data());
 }
 
 [[noreturn]]
 static void abort_print_exit_message(const std::span<const char> exit_message)
 {
 	print_exit_message(exit_message);
-	d_debugbreak();
-	std::abort();
+	//d_debugbreak();
+	//std::abort();
+	exit(1);
 }
 
 [[noreturn]]

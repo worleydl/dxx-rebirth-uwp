@@ -549,7 +549,7 @@ int songs_play_file(const char *filename, int repeat, void (*hook_finished_track
 	++ fptr;
 	if (!d_stricmp(fptr, SONG_EXT_HMP))
 	{
-#if defined(_WIN32)
+#if defined(_WIN32_HACKED_OUT)
 		return digi_win32_play_midi_song( filename, repeat );
 #elif DXX_USE_SDLMIXER
 		return mix_play_file( filename, repeat, hook_finished_track );

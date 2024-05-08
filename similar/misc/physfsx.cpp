@@ -220,6 +220,10 @@ bool PHYSFSX_init(int argc, char *argv[])
 	}
 	
 	//tell PHYSFS where hogdir is
+	
+	// Add E search path
+	PHYSFS_mount("E:\\descent1", nullptr, 1);
+
 	if (!CGameArg.SysHogDir.empty())
 	{
 		const auto p = CGameArg.SysHogDir.c_str();

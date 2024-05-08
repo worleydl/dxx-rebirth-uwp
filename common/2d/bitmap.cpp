@@ -51,14 +51,14 @@ static void report_overflow(const std::array<char, 124> &buf, const int written)
 [[noreturn]]
 static void report_offset_overflow(const char dimension, const uint16_t displacement, const uint16_t parent_displacement)
 {
-	std::array<char, 124> buf;
+	std::array<char, 124> buf = {};
 	report_overflow(buf, {std::snprintf(std::data(buf), std::size(buf), "offset overflow: %c displacement %hu + parent %hu exceeds uint16_t", dimension, displacement, parent_displacement)});
 }
 
 [[noreturn]]
 static void report_dimension_overflow(const char dimension, const uint16_t offset, const uint16_t parent_dimension)
 {
-	std::array<char, 124> buf;
+	std::array<char, 124> buf = {};
 	report_overflow(buf, {std::snprintf(std::data(buf), std::size(buf), "offset beyond parent dimension: %c offset %hu > parent %hu", dimension, offset, parent_dimension)});
 }
 

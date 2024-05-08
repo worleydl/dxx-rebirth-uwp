@@ -25,6 +25,7 @@ COPYRIGHT 1993-1999 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 
 #include <algorithm>
 #include <cassert>
+#include <inttypes.h>
 #include <numeric>
 #include <stdlib.h>
 #include <stdio.h>

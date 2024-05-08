@@ -419,7 +419,7 @@ static constexpr PHYSFSX_read_sequence_helper<fixang, PHYSFS_readSLE16, vms_angv
 template <std::size_t N>
 static auto PHYSFSX_skipBytes(PHYSFS_File *const fp)
 {
-	std::array<uint8_t, N> skip;
+	std::array<uint8_t, N> skip = {};
 	return PHYSFS_readBytes(fp, std::data(skip), std::size(skip));
 }
 

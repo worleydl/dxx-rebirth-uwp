@@ -137,7 +137,7 @@ void Warning_puts(const char *str)
 	if (warn == NULL)
 		return;
 #endif
-	std::array<char, MAX_MSG_LEN> warn_message;
+	std::array<char, MAX_MSG_LEN> warn_message = {};
 	const auto written = snprintf(std::data(warn_message), std::size(warn_message), "Warning: %s", str);
 	(*warn)(std::span<const char>(warn_message.data(), written));
 }

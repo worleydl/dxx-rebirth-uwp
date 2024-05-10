@@ -39,7 +39,7 @@ COPYRIGHT 1993-1998 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 #if defined(__APPLE__) && defined(__MACH__)
 #include <OpenGL/gl.h>
 #else
-#include <GL/gl.h>
+#include "glad/gl.h"
 #endif
 #endif
 

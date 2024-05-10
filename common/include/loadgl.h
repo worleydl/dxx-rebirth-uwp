@@ -25,9 +25,9 @@
 #define OGLFUNCCALL
 #endif
 
-#include <GL/gl.h>
-#include "pstypes.h"
+#include "glad/gl.h"
 
+/*
 //gl extensions.
 #ifndef GL_ARB_multitexture
 #define GL_ARB_multitexture 1
@@ -467,4 +467,5 @@ static void OpenGL_SetFuncsToNull(void)
 #endif
 
 
+*/
 #endif //!__LOADGL_H__

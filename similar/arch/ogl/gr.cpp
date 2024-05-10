@@ -54,6 +54,7 @@
 #if defined(__APPLE__) && defined(__MACH__)
 #include <OpenGL/glu.h>
 #else
+#include "glad/gl.h"
 #if DXX_USE_OGLES
 #include <EGL/egl.h>
 #include <X11/Xlib.h>
@@ -725,7 +726,8 @@ int gr_set_mode(screen_mode mode)
 	gr_init_canvas(grd_curscreen->sc_canvas, gr_new_bm_data, bm_mode::ogl, w, h);
 
 	ogl_init_window(w,h);//platform specific code
-	ogl_extensions_init();
+	gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
+	//ogl_extensions_init();
 	ogl_tune_for_current();
 	sync_helper.init(CGameArg.OglSyncMethod, CGameArg.OglSyncWait);
 
@@ -748,6 +750,7 @@ static int ogl_init_load_library(void)
 	int retcode=0;
 	if (!ogl_rt_loaded)
 	{
+		/*
 		retcode = OpenGL_LoadLibrary(true, OglLibPath);
 		if(retcode)
 		{
@@ -760,6 +763,8 @@ static int ogl_init_load_library(void)
 		{
 			Error("Opengl: error loading %s\n", OglLibPath);
 		}
+		*/
+		gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
 		ogl_rt_loaded=1;
 	}
 	return retcode;
@@ -903,7 +908,7 @@ void gr_close()
 	ogl_close_pixel_buffers();
 #ifdef _WIN32
 	if (ogl_rt_loaded)
-		OpenGL_LoadLibrary(false, OglLibPath);
+		gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
 #endif
 
 #if DXX_USE_OGLES && SDL_MAJOR_VERSION == 1

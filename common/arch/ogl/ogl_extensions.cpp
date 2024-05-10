@@ -32,6 +32,7 @@ GLfloat ogl_maxanisotropy = 0.0f;
 
 namespace {
 
+#ifdef LEGACY_GL_INIT
 static std::array<long, 2> parse_version_str(const char *v)
 {
 	std::array<long, 2> version;
@@ -138,6 +139,7 @@ void ogl_extensions_init()
 		? (ogl_have_ARB_sync = true, std::span<const char>{"DXX-Rebirth: OpenGL: GL_ARB_sync available"})
 		: std::span<const char>{"DXX-Rebirth: OpenGL: GL_ARB_sync not available"};
 	con_puts(CON_VERBOSE, s);
+#endif
 }
 
 }

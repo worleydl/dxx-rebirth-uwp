@@ -22,8 +22,7 @@
 #		if DXX_USE_OGLES
 #			include <GLES/gl.h>
 #		else
-#			include <GL/gl.h>
-#			include <GL/glext.h>
+#			include "glad/gl.h"
 #		endif
 #	endif
 #endif

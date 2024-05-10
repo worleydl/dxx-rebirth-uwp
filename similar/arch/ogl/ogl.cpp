@@ -24,8 +24,7 @@
 #if DXX_USE_OGLES
 #include <GLES/gl.h>
 #else
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include "glad/gl.h"
 #endif
 #endif
 #include <string.h>
@@ -1835,6 +1834,7 @@ static int ogl_loadtexture(const palette_array_t &pal, const uint8_t *data, cons
 #else
 	if (buildmipmap)
 	{
+		//glGenerateMipmap(tex.handle);
 	}
 	else
 #endif

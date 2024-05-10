@@ -468,10 +468,10 @@ class ConfigureTests(_ConfigureTests):
 					'LINKFLAGS': ['-mwindows']
 				}
 
-			if display_name == 'SDL2_mixer_disabled':
+			if display_name == 'SDL2_mixer':
 				flags = {
 					'CPPPATH': ['C:/dev/uwp/deps/SDL_mixer/include'],
-					'LIBPATH': ['C:/dev/uwp/deps/SDL_mixer/VisualC-WinRT/x64/Debug/SDL_mixer-UWP'],
+					'LIBPATH': ['C:/dev/uwp/deps/SDL_mixer/build_winrt/Release'],
 					'LIBS': ['mingw32','SDL2', 'SDL2_mixer'],
 					'LINKFLAGS': ['-mwindows']
 				}

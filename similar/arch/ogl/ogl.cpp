@@ -187,6 +187,19 @@ static void perspective(double fovy, double aspect, double zNear, double zFar)
 }
 #endif
 
+// gluPerspective replacement taken from nehe's site: https://nehe.gamedev.net/article/replacement_for_gluperspective/21002/ 
+inline void perspectiveGL( GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar )
+{
+    const GLdouble pi = 3.1415926535897932384626433832795;
+    GLdouble fW, fH;
+
+    //fH = tan( (fovY / 2) / 180 * pi ) * zNear;
+    fH = tan( fovY / 360 * pi ) * zNear;
+    fW = fH * aspect;
+
+    glFrustum( -fW, fW, -fH, fH, zNear, zFar );
+}
+
 namespace dcx {
 
 static void ogl_init_texture_stats(ogl_texture &t)
@@ -1290,6 +1303,7 @@ void ogl_start_frame(grs_canvas &canvas)
 #if DXX_USE_OGLES
 	perspective(90.0,1.0,0.1,5000.0);   
 #else
+	perspectiveGL(90.0,1.0,0.1,5000.0);
 #endif
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();//clear matrix
@@ -1834,7 +1848,12 @@ static int ogl_loadtexture(const palette_array_t &pal, const uint8_t *data, cons
 #else
 	if (buildmipmap)
 	{
-		//glGenerateMipmap(tex.handle);
+		glTexImage2D (
+			GL_TEXTURE_2D, 0, tex.internalformat,
+			tex.tw * rescale, tex.th * rescale, 0, tex.format, // RGBA textures.
+			GL_UNSIGNED_BYTE, // imageData is a GLubyte pointer.
+			outP);
+		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	else
 #endif

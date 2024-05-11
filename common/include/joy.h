@@ -49,7 +49,7 @@ namespace dcx {
 #if DXX_MAX_BUTTONS_PER_JOYSTICK
 bool joy_translate_menu_key(const d_event &event);
 int event_joystick_get_button(const d_event &event);
-window_event_result joy_button_handler(const SDL_JoyButtonEvent *jbe);
+window_event_result joy_button_handler(const SDL_ControllerButtonEvent *cbe);
 #else
 #define joy_button_handler(jbe) (static_cast<const SDL_JoyButtonEvent *const &>(jbe), window_event_result::ignored)
 #endif
@@ -62,13 +62,13 @@ window_event_result joy_hat_handler(const SDL_JoyHatEvent *jhe);
 
 #if DXX_MAX_AXES_PER_JOYSTICK
 const d_event_joystick_axis_value &event_joystick_get_axis(const d_event &event);
-window_event_result joy_axis_handler(const SDL_JoyAxisEvent *jae);
+window_event_result joy_axis_handler(const SDL_ControllerAxisEvent *cae);
 #else
 #define joy_axis_handler(jbe) (static_cast<const SDL_JoyAxisEvent *const &>(jbe), window_event_result::ignored)
 #endif
 
 #if DXX_MAX_AXES_PER_JOYSTICK && (DXX_MAX_BUTTONS_PER_JOYSTICK || DXX_MAX_HATS_PER_JOYSTICK)
-window_event_result joy_axisbutton_handler(const SDL_JoyAxisEvent *jae);
+window_event_result joy_axisbutton_handler(const SDL_ControllerAxisEvent *cae);
 #else
 #define joy_axisbutton_handler(jbe) (static_cast<const SDL_JoyAxisEvent *const &>(jbe), window_event_result::ignored)
 #endif

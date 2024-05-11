@@ -62,12 +62,12 @@ struct d_event_joystick_moved : d_event, d_event_joystick_axis_value
 	using d_event::d_event;
 };
 
-class SDL_Joystick_deleter
+class SDL_GameController_deleter
 {
 public:
-	void operator()(SDL_Joystick *j) const
+	void operator()(SDL_GameController *gc) const
 	{
-		SDL_JoystickClose(j);
+		SDL_GameControllerClose(gc);
 	}
 };
 
@@ -162,7 +162,7 @@ class d_physical_joystick
 	{	\
 		return std::get<V>(t);	\
 	}
-	using tuple_member_type_handle = std::unique_ptr<SDL_Joystick, SDL_Joystick_deleter>;
+	using tuple_member_type_handle = std::unique_ptr<SDL_GameController, SDL_GameController_deleter>;
 	//Note: Descent expects hats to be buttons, so these are indices into Joystick.buttons
 	struct tuple_member_type_hat_map : std::array<unsigned, DXX_MAX_HATS_PER_JOYSTICK> {};
 	struct tuple_member_type_button_map : std::array<unsigned, DXX_MAX_BUTTONS_PER_JOYSTICK> {};
@@ -185,22 +185,22 @@ public:
 #undef for_each_tuple_item
 };
 
-static std::array<d_physical_joystick, DXX_MAX_JOYSTICKS> SDL_Joysticks;
+static std::array<d_physical_joystick, DXX_MAX_JOYSTICKS> SDL_GameControllers;
 
 }
 
 #if DXX_MAX_BUTTONS_PER_JOYSTICK
-window_event_result joy_button_handler(const SDL_JoyButtonEvent *const jbe)
+window_event_result joy_button_handler(const SDL_ControllerButtonEvent *const cbe)
 {
-	const unsigned button = SDL_Joysticks[jbe->which].button_map()[jbe->button];
+	const unsigned button = SDL_GameControllers[cbe->which].button_map()[cbe->button];
 
-	Joystick.button_state[button] = jbe->state;
+	Joystick.button_state[button] = cbe->state;
 
 	const d_event_joystickbutton event{
-		(jbe->type == SDL_JOYBUTTONDOWN) ? event_type::joystick_button_down : event_type::joystick_button_up,
+		(cbe->type == SDL_CONTROLLERBUTTONDOWN) ? event_type::joystick_button_down : event_type::joystick_button_up,
 		button
 	};
-	con_printf(CON_DEBUG, "Sending event %s, button %d", (jbe->type == SDL_JOYBUTTONDOWN) ? "event_type::joystick_button_down" : "EVENT_JOYSTICK_JOYSTICK_UP", event.button);
+	con_printf(CON_DEBUG, "Sending event %s, button %d", (cbe->type == SDL_CONTROLLERBUTTONDOWN) ? "event_type::controller_button_down" : "EVENT_JOYSTICK_JOYSTICK_UP", event.button);
 	return event_send(event);
 }
 #endif
@@ -208,7 +208,7 @@ window_event_result joy_button_handler(const SDL_JoyButtonEvent *const jbe)
 #if DXX_MAX_HATS_PER_JOYSTICK
 window_event_result joy_hat_handler(const SDL_JoyHatEvent *const jhe)
 {
-	int hat = SDL_Joysticks[jhe->which].hat_map()[jhe->hat];
+	int hat = SDL_GameControllers[jhe->which].hat_map()[jhe->hat];
 	window_event_result highest_result(window_event_result::ignored);
 	//Save last state of the hat-button
 
@@ -266,11 +266,11 @@ static window_event_result send_axis_button_event(unsigned button, event_type e)
 
 }
 
-window_event_result joy_axisbutton_handler(const SDL_JoyAxisEvent *const jae)
+window_event_result joy_axisbutton_handler(const SDL_ControllerAxisEvent *const cae)
 {
-	auto &js = SDL_Joysticks[jae->which];
-	auto axis_value = js.axis_value()[jae->axis];
-	auto button = js.axis_button_map()[jae->axis];
+	auto &js = SDL_GameControllers[cae->which];
+	auto axis_value = js.axis_value()[cae->axis];
+	auto button = js.axis_button_map()[cae->axis];
 	window_event_result highest_result(window_event_result::ignored);
 
 	// We have to hardcode a deadzone here. It's not mapped into the settings.
@@ -278,7 +278,7 @@ window_event_result joy_axisbutton_handler(const SDL_JoyAxisEvent *const jae)
 	// I think it's safe to assume a 30% deadzone on analog button presses for now.
 	const decltype(axis_value) deadzone = 38;
 	auto prev_value = apply_deadzone(axis_value, deadzone);
-	auto new_value = apply_deadzone(jae->value/256, deadzone);
+	auto new_value = apply_deadzone(cae->value/256, deadzone);
 
 	if (prev_value <= 0 && new_value >= 0) // positive pressed
 	{
@@ -299,17 +299,17 @@ window_event_result joy_axisbutton_handler(const SDL_JoyAxisEvent *const jae)
 }
 #endif
 
-window_event_result joy_axis_handler(const SDL_JoyAxisEvent *const jae)
+window_event_result joy_axis_handler(const SDL_ControllerAxisEvent *const cae)
 {
-	auto &js = SDL_Joysticks[jae->which];
-	const auto axis = js.axis_map()[jae->axis];
-	auto &axis_value = js.axis_value()[jae->axis];
+	auto &js = SDL_GameControllers[cae->which];
+	const auto axis = js.axis_map()[cae->axis];
+	auto &axis_value = js.axis_value()[cae->axis];
 	// inaccurate stick is inaccurate. SDL might send SDL_JoyAxisEvent even if the value is the same as before.
-	if (axis_value == jae->value/256)
+	if (axis_value == cae->value/256)
 		return window_event_result::ignored;
 
 	d_event_joystick_moved event{event_type::joystick_moved};
-	event.value = axis_value = jae->value/256;
+	event.value = axis_value = cae->value/256;
 	event.axis = axis;
 	con_printf(CON_DEBUG, "Sending event event_type::joystick_moved, axis: %d, value: %d",event.axis, event.value);
 
@@ -337,8 +337,8 @@ static unsigned check_warn_joy_support_limit(const unsigned n, const char *const
 
 void joy_init()
 {
-	if (SDL_Init(SDL_INIT_JOYSTICK) < 0) {
-		con_printf(CON_NORMAL, "sdl-joystick: initialisation failed: %s.",SDL_GetError());
+	if (SDL_Init(SDL_INIT_GAMECONTROLLER) < 0) {
+		con_printf(CON_NORMAL, "sdl-controller: initialisation failed: %s.",SDL_GetError());
 		return;
 	}
 
@@ -354,9 +354,9 @@ void joy_init()
 	unsigned joystick_n_buttons = 0, joystick_n_axes = 0;
 	range_for (const unsigned i, xrange(n))
 	{
-		auto &joystick = SDL_Joysticks[num_joysticks];
-		const auto handle = SDL_JoystickOpen(i);
-		joystick.handle().reset(handle);
+		auto &joystick = SDL_GameControllers[num_joysticks];
+		const auto handle = SDL_GameControllerGetJoystick(SDL_GameControllerOpen(i));
+		//joystick.handle().reset(handle);
 #if SDL_MAJOR_VERSION == 1
 		con_printf(CON_NORMAL, "sdl-joystick %d: %s", i, SDL_JoystickName(i));
 #else
@@ -443,7 +443,7 @@ void joy_init()
 
 void joy_close()
 {
-	range_for (auto &j, SDL_Joysticks)
+	range_for (auto &j, SDL_GameControllers)
 		j.handle().reset();
 #if DXX_MAX_AXES_PER_JOYSTICK
 	joyaxis_text.clear();
@@ -470,7 +470,7 @@ void joy_flush()
 	Joystick.button_state = {};
 #endif
 #if DXX_MAX_AXES_PER_JOYSTICK
-	range_for (auto &j, SDL_Joysticks)
+	range_for (auto &j, SDL_GameControllers)
 		j.axis_value() = {};
 #endif
 }

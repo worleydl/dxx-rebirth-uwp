@@ -147,19 +147,26 @@ void event_poll_state::process_event_batch(const std::ranges::subrange<const SDL
 					continue;
 				result = mouse_motion_handler(&event.motion);
 				break;
-			case SDL_JOYBUTTONDOWN:
-			case SDL_JOYBUTTONUP:
+			case SDL_CONTROLLERDEVICEADDED:
+				joy_init();
+				break;
+			case SDL_CONTROLLERDEVICEREMOVED:
+				joy_close();
+				joy_init();
+				break;
+			case SDL_CONTROLLERBUTTONDOWN:
+			case SDL_CONTROLLERBUTTONUP:
 				if (CGameArg.CtlNoJoystick)
 					continue;
-				result = joy_button_handler(&event.jbutton);
+				result = joy_button_handler(&event.cbutton);
 				break;
-			case SDL_JOYAXISMOTION:
+			case SDL_CONTROLLERAXISMOTION:
 				if (CGameArg.CtlNoJoystick)
 					continue;
 #if DXX_MAX_BUTTONS_PER_JOYSTICK || DXX_MAX_HATS_PER_JOYSTICK
-				highest_result = std::max(joy_axisbutton_handler(&event.jaxis), highest_result);
+				highest_result = std::max(joy_axisbutton_handler(&event.caxis), highest_result);
 #endif
-				result = joy_axis_handler(&event.jaxis);
+				result = joy_axis_handler(&event.caxis);
 				break;
 			case SDL_JOYHATMOTION:
 				if (CGameArg.CtlNoJoystick)

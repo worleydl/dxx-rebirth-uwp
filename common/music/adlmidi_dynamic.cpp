@@ -45,6 +45,8 @@ using HMODULE = void *;
 
 }
 
+namespace dcx {
+
 static ADL_MIDIPlayer *adl_init_failure(long)
 {
 	return nullptr;
@@ -71,7 +73,7 @@ static bool load_function(const HMODULE handle, const char *const name, F *&fptr
 static ADL_MIDIPlayer *adl_init_first_call(long sample_rate)
 {
 #if defined(_WIN32)
-	const char *library_name = "libADLMIDI.dll";
+	const char *library_name = "ADLMIDI.dll";
 #elif defined(__APPLE__)
 	const char *library_name = "libADLMIDI.dylib";
 #else
@@ -101,7 +103,9 @@ static ADL_MIDIPlayer *adl_init_first_call(long sample_rate)
 	return adl_init(sample_rate);
 }
 
-ADL_MIDIPlayer *(*adl_init)(long sample_rate) = &adl_init_first_call;
+}
+
+ADL_MIDIPlayer *(*adl_init)(long sample_rate) = &dcx::adl_init_first_call;
 void (*adl_close)(ADL_MIDIPlayer *device);
 int (*adl_switchEmulator)(ADL_MIDIPlayer *device, int emulator);
 int (*adl_setNumChips)(ADL_MIDIPlayer *device, int numChips);

@@ -412,6 +412,7 @@ static int MakeNewPlayerFile(int allow_abort)
 			{
 			}
 		};
+		SDL_StartTextInput();
 		const auto x = run_blocking_newmenu<pilot_name_menu>(*grd_curcanv, text);
 		const char *const name = text;
 		if (x < 0 || !*name)
@@ -431,6 +432,8 @@ static int MakeNewPlayerFile(int allow_abort)
 		}
 		break;
 	}
+
+	SDL_StopTextInput();
 
 	new_player_config();
 	InterfaceUniqueState.PilotName = text;

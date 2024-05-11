@@ -1279,6 +1279,7 @@ void ogl_set_blending(const gr_blend cv_blend_func)
 
 void ogl_start_frame(grs_canvas &canvas)
 {
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 1);  // TODO: Get actual variable
 	r_polyc=0;r_tpolyc=0;r_bitmapc=0;r_ubitbltc=0;
 
 	OGL_VIEWPORT(canvas.cv_bitmap.bm_x, canvas.cv_bitmap.bm_y, canvas.cv_bitmap.bm_w, canvas.cv_bitmap.bm_h);
@@ -1414,6 +1415,14 @@ void ogl_end_frame(void){
 
 void gr_flip(void)
 {
+    // Copy offscreen render to screen
+	int dispW, dispH;
+	SDL_GL_GetDrawableSize(g_pRebirthSDLMainWindow, &dispW, &dispH);
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 1);
+	glBlitFramebuffer(0, 0, grd_curscreen->get_screen_width(), grd_curscreen->get_screen_height(), 0, 0, dispW, dispH, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	//glBlitNamedFramebuffer(1, 0, 0, 0, 800, 600, 0, 0, 800, 600, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 	if (CGameArg.DbgRenderStats)
 	{
 		gr_set_default_canvas();
@@ -1422,6 +1431,9 @@ void gr_flip(void)
 
 	ogl_do_palfx();
 	ogl_swap_buffers_internal();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glBindFramebuffer(GL_FRAMEBUFFER, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 

@@ -731,6 +731,34 @@ int gr_set_mode(screen_mode mode)
 	ogl_tune_for_current();
 	sync_helper.init(CGameArg.OglSyncMethod, CGameArg.OglSyncWait);
 
+	// Setup framebuffer
+	GLuint fbo, color, depth;
+	glGenFramebuffers(1, &fbo);
+	glGenTextures(1, &color);
+	glGenRenderbuffers(1, &depth);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+	glBindTexture(GL_TEXTURE_2D, color);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color, 0);
+
+	glBindRenderbuffer(GL_RENDERBUFFER, depth);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
+	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth);
+
+	if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		fbo = fbo;
+
+
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 	OGL_VIEWPORT(0,0,w,h);
 	ogl_init_state();
 	gamefont_choose_game_font(w,h);

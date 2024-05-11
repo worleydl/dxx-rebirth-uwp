@@ -1133,8 +1133,10 @@ void kconfig_read_controls(control_info &Controls, const d_event &event, int aut
 #if DXX_MAX_BUTTONS_PER_JOYSTICK
 		case event_type::joystick_button_down:
 		case event_type::joystick_button_up:
+#ifdef DXX_OPTIONAL_JOYSTICK
 			if (!(PlayerCfg.ControlType & CONTROL_USING_JOYSTICK))
 				break;
+#endif
 			{
 				const auto &&button = event_joystick_get_button(event);
 				if (button < 255)
@@ -1180,8 +1182,10 @@ void kconfig_read_controls(control_info &Controls, const d_event &event, int aut
 		case event_type::joystick_moved:
 		{
 			int joy_null_value = 0;
+#ifdef DXX_OPTIONAL_JOYSTICK
 			if (!(PlayerCfg.ControlType & CONTROL_USING_JOYSTICK))
 				break;
+#endif
 			const auto &av = event_joystick_get_axis(event);
 			const auto &axis = av.axis;
 			auto value = av.value;

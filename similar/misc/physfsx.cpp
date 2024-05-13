@@ -156,6 +156,7 @@ bool PHYSFSX_init(int argc, char *argv[])
 	path = "~/Library/Preferences/D" DESCENT_PATH_NUMBER "X Rebirth/";
 # endif
 	}
+
 	
 	if (path[0] == '~') // yes, this tilde can be put before non-unix paths.
 	{
@@ -210,6 +211,13 @@ bool PHYSFSX_init(int argc, char *argv[])
 	if (!InitArgs(std::span(argv, argc).template subspan<1>()))
 		return false;
 	PHYSFS_unmount(base_dir);
+
+	#if defined(DXX_BUILD_DESCENT_I)
+	PHYSFS_setWriteDir("E:\\descent1");
+	#elif defined(DXX_BUILD_DESCENT_II)
+	PHYSFS_setWriteDir("E:\\descent2");
+	#endif
+
 	
 	if (!PHYSFS_getWriteDir())
 	{

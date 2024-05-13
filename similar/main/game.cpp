@@ -1827,6 +1827,7 @@ window_event_result game_window::event_handler(const d_event &event)
 			{
 				calc_frame_time();
 				result = GameProcessFrame(LevelSharedRobotInfoState);
+				SDL_StopTextInput();
 			}
 
 			if (!Automap_active)		// efficiency hack

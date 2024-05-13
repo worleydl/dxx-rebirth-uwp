@@ -34,7 +34,6 @@
 namespace dcx {
 
 namespace {
-
 int num_joysticks = 0;
 
 std::vector<unsigned> joy_key_map;
@@ -503,6 +502,13 @@ bool joy_translate_menu_key(const d_event &event) {
 		return false;
 	auto &e = static_cast<const d_event_joystickbutton &>(event);
 	assert(e.button < joy_key_map.size());
+
+	// Select toggles the onscreen keyboard in UWP
+	if (e.button == 4) {
+		SDL_StartTextInput();
+		return true;
+	}
+
 	auto key = joy_key_map[e.button];
 	if (key)
 	{

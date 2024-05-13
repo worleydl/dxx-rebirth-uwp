@@ -1123,6 +1123,7 @@ static window_event_result newmenu_key_command(const d_event &event, newmenu *co
 					case nm_type::menu:
 					case nm_type::input:
 					case nm_type::input_menu:
+						SDL_StartTextInput();
 						break;
 					case nm_type::check:
 						citem.value = !citem.value;

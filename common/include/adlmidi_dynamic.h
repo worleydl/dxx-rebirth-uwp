@@ -32,6 +32,41 @@ enum ADL_Emulator
     ADLMIDI_EMU_DOSBOX = 2,
 };
 
+// TODO: Just use adlmidi.h?
+// ADLMIDI_VolumeModels/ADLMIDI_ChannelAlloc come from libADLMIDI's adlmidi.h
+/**
+ * @brief Volume scaling models
+ */
+enum ADLMIDI_VolumeModels
+{
+    /*! Automatical choice by the specific bank */
+    ADLMIDI_VolumeModel_AUTO = 0,
+    ADLMIDI_VolumeModel_Generic = 1,
+    /*! Linearized scaling model, most standard */
+    ADLMIDI_VolumeModel_HMI = 10,
+    ADLMIDI_VolumeModel_HMI_OLD = 11,
+    /*! Count of available volume model modes */
+    ADLMIDI_VolumeModel_Count
+};
+
+/*!
+ * \brief Algorithms of channel allocation for new notes
+ */
+enum ADLMIDI_ChannelAlloc
+{
+    /*! Automatical choise of the method according to the volume model and internal preferrences */
+    ADLMIDI_ChanAlloc_AUTO = -1,
+    /*! Take only channels that has expired sounding delay */
+    ADLMIDI_ChanAlloc_OffDelay,
+    /*! Take any first released channel with the same instrument */
+    ADLMIDI_ChanAlloc_SameInst,
+    /*! Take any first released channel */
+    ADLMIDI_ChanAlloc_AnyReleased,
+    /*! Count of available channel allocation modes */
+    ADLMIDI_ChanAlloc_Count
+};
+
+
 /*
  * A few embedded bank numbers.
  */
@@ -55,11 +90,14 @@ enum class ADL_EmbeddedBank
 
 extern ADL_MIDIPlayer *(*adl_init)(long sample_rate);
 extern void (*adl_close)(ADL_MIDIPlayer *device);
+extern void (*adl_reset)(struct ADL_MIDIPlayer *device);
 extern int (*adl_switchEmulator)(ADL_MIDIPlayer *device, int emulator);
 extern int (*adl_setNumChips)(ADL_MIDIPlayer *device, int numChips);
 extern int (*adl_setBank)(ADL_MIDIPlayer *device, int bank);
+extern void (*adl_setChannelAllocMode)(ADL_MIDIPlayer *device, int chanAlloc);
 extern void (*adl_setSoftPanEnabled)(ADL_MIDIPlayer *device, int softPanEn);
 extern void (*adl_setLoopEnabled)(ADL_MIDIPlayer *device, int loopEn);
+extern void (*adl_setVolumeRangeModel)(ADL_MIDIPlayer *device, int volumeModel);
 extern int (*adl_openData)(ADL_MIDIPlayer *device, const void *mem, unsigned long size);
 extern int (*adl_openFile)(ADL_MIDIPlayer *device, const char *filePath);
 extern int (*adl_playFormat)(ADL_MIDIPlayer *device, int sampleCount, uint8_t *left, uint8_t *right, const ADLMIDI_AudioFormat *format);

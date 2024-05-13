@@ -12,6 +12,7 @@
  *  -- MD2211 (2006-04-24)
  */
 
+#include <map>
 #include <span>
 #include <SDL.h>
 #include <SDL_mixer.h>
@@ -82,6 +83,44 @@ void current_music_t::reset(SDL_RWops *const rw)
 static current_music_t current_music;
 static std::vector<uint8_t> current_music_hndlbuf;
 
+// Could parse this from the hog but since it's static this was easier
+struct compare_str
+{
+	bool operator()(char const* a, char const* b) const
+	{
+		return std::strcmp(a, b);
+	}
+};
+std::map<const char*, int, compare_str> adl_song_banks = {
+	{"descent.hmp", 4},
+	{"briefing.hmp", 2},
+	{"endlevel.hmp", 3},
+	{"endgame.hmp", 3},
+	{"credits.hmp", 2},
+	{"game01.hmp", 4},
+	{"game02.hmp", 4},
+	{"game03.hmp", 3},
+	{"game04.hmp", 2},
+	{"game05.hmp", 2},
+	{"game06.hmp", 2},
+	{"game07.hmp", 4},
+	{"game08.hmp", 5},
+	{"game09.hmp", 2},
+	{"game10.hmp", 2},
+	{"game11.hmp", 3},
+	{"game12.hmp", 2},
+	{"game13.hmp", 4},
+	{"game14.hmp", 4},
+	{"game15.hmp", 2},
+	{"game16.hmp", 2},
+	{"game17.hmp", 2},
+	{"game18.hmp", 3},
+	{"game19.hmp", 4},
+	{"game20.hmp", 2},
+	{"game21.hmp", 3},
+	{"game22.hmp", 4},
+};
+
 static void mix_set_music_type_sdlmixer(int loop, void (*const hook_finished_track)())
 {
 	Mix_PlayMusic(current_music.get(), (loop ? -1 : 1));
@@ -103,13 +142,24 @@ static ADL_MIDIPlayer *get_adlmidi()
 		if (adlmidi)
 		{
 			adl_switchEmulator(adlmidi, ADLMIDI_EMU_DOSBOX);
-			adl_setNumChips(adlmidi, CGameCfg.ADLMIDI_num_chips);
+			//adl_setNumChips(adlmidi, CGameCfg.ADLMIDI_num_chips);
 			adl_setBank(adlmidi, CGameCfg.ADLMIDI_bank);
 			adl_setSoftPanEnabled(adlmidi, 1);
+			adl_setChannelAllocMode(adlmidi, ADLMIDI_ChanAlloc_AnyReleased);
+			adl_setVolumeRangeModel(adlmidi, ADLMIDI_VolumeModel_HMI);
 			current_adlmidi.reset(adlmidi);
 		}
 	}
 	return adlmidi;
+}
+
+static void switch_bank(const char* filename) {
+	auto adlmidi = get_adlmidi(); // Hacky, need to init sooner
+
+	//adl_setNumChips(adlmidi, CGameCfg.ADLMIDI_num_chips);
+	adl_setBank(adlmidi, adl_song_banks[filename]);
+	adl_reset(adlmidi);
+
 }
 
 static void mix_adlmidi(void *udata, Uint8 *stream, int len);
@@ -151,7 +201,17 @@ int mix_play_file(const char *filename, int loop, void (*const entry_hook_finish
 	// It's a .hmp!
 	if (const auto fptr = strrchr(filename, '.'); fptr && !d_stricmp(fptr, ".hmp"))
 	{
-		if (auto &&[v, hoe] = hmp2mid(filename); hoe == hmp_open_error::None)
+		char* hmq_filename = (char*)malloc(strlen(filename) + 1);
+		strcpy(hmq_filename, filename);
+		hmq_filename[strlen(hmq_filename) - 1] = 'q'; // Change hmp -> hmq
+
+		// TODO: Set to always false if adlmidi isn't in use
+		bool hmq_exists = PHYSFSX_exists(hmq_filename, 1);
+
+		// Update bank to use for adlmidi
+		switch_bank(filename);
+
+		if (auto &&[v, hoe] = hmp2mid(hmq_exists ? hmq_filename : filename); hoe == hmp_open_error::None)
 		{
 			current_music_hndlbuf = std::move(v);
 			current_music_type = load_mus_data(current_music_hndlbuf, loop, hook_finished_track);

@@ -73,7 +73,7 @@ static bool load_function(const HMODULE handle, const char *const name, F *&fptr
 static ADL_MIDIPlayer *adl_init_first_call(long sample_rate)
 {
 #if defined(_WIN32)
-	const char *library_name = "ADLMIDI.dll";
+	const char *library_name = "libADLMIDI.dll";
 #elif defined(__APPLE__)
 	const char *library_name = "libADLMIDI.dylib";
 #else
@@ -83,11 +83,14 @@ static ADL_MIDIPlayer *adl_init_first_call(long sample_rate)
 	if (!handle ||
 	    !load_function(handle, "adl_init", adl_init) ||
 	    !load_function(handle, "adl_close", adl_close) ||
+	    !load_function(handle, "adl_reset", adl_reset) ||
 	    !load_function(handle, "adl_switchEmulator", adl_switchEmulator) ||
 	    !load_function(handle, "adl_setNumChips", adl_setNumChips) ||
 	    !load_function(handle, "adl_setBank", adl_setBank) ||
+	    !load_function(handle, "adl_setChannelAllocMode", adl_setChannelAllocMode) ||
 	    !load_function(handle, "adl_setSoftPanEnabled", adl_setSoftPanEnabled) ||
 	    !load_function(handle, "adl_setLoopEnabled", adl_setLoopEnabled) ||
+	    !load_function(handle, "adl_setVolumeRangeModel", adl_setVolumeRangeModel) ||
 	    !load_function(handle, "adl_openData", adl_openData) ||
 	    !load_function(handle, "adl_openFile", adl_openFile) ||
 	    !load_function(handle, "adl_playFormat", adl_playFormat))
@@ -107,11 +110,14 @@ static ADL_MIDIPlayer *adl_init_first_call(long sample_rate)
 
 ADL_MIDIPlayer *(*adl_init)(long sample_rate) = &dcx::adl_init_first_call;
 void (*adl_close)(ADL_MIDIPlayer *device);
+void (*adl_reset)(ADL_MIDIPlayer *device);
 int (*adl_switchEmulator)(ADL_MIDIPlayer *device, int emulator);
 int (*adl_setNumChips)(ADL_MIDIPlayer *device, int numChips);
 int (*adl_setBank)(ADL_MIDIPlayer *device, int bank);
+void (*adl_setChannelAllocMode)(ADL_MIDIPlayer *device, int chanalloc);
 void (*adl_setSoftPanEnabled)(ADL_MIDIPlayer *device, int softPanEn);
 void (*adl_setLoopEnabled)(ADL_MIDIPlayer *device, int loopEn);
+void (*adl_setVolumeRangeModel)(ADL_MIDIPlayer *device, int volumeModel);
 int (*adl_openData)(ADL_MIDIPlayer *device, const void *mem, unsigned long size);
 int (*adl_openFile)(ADL_MIDIPlayer *device, const char *filePath);
 int (*adl_playFormat)(ADL_MIDIPlayer *device, int sampleCount, uint8_t *left, uint8_t *right, const ADLMIDI_AudioFormat *format);

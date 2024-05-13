@@ -1428,8 +1428,8 @@ int main(int argc,char**argv)
 		context.Result(f'{self.msgprefix}: checking whether to enable {label}...{"yes" if condition else "no"}')
 
 	@_custom_test
-	#def _check_user_settings_debug(self,context,_CPPDEFINES=(('NDEBUG',), ('RELEASE',))):
-	def _check_user_settings_debug(self,context,_CPPDEFINES=(('DEBUG',))): # For some logging
+	def _check_user_settings_debug(self,context,_CPPDEFINES=(('NDEBUG',), ('RELEASE',))):
+	#def _check_user_settings_debug(self,context,_CPPDEFINES=(('DEBUG',))): # For some logging
 		self._result_check_user_setting(context, not self.user_settings.debug, _CPPDEFINES, 'release options')
 
 	@_custom_test
@@ -4655,7 +4655,7 @@ class DXXCommon(LazyObjectConstructor):
 		# appended to this list and will override these defaults.  The
 		# defaults are present to ensure that a user who does not set
 		# any options gets a good default experience.
-		env.Prepend(CXXFLAGS = ['-g']) #, '-O2'])
+		env.Prepend(CXXFLAGS = ['-g', '-O2'])
 		# Raspberry Pi?
 		if user_settings.raspberrypi == 'yes':
 			rpi_vc_path = user_settings.rpi_vc_path

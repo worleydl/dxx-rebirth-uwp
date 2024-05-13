@@ -149,11 +149,11 @@ void event_poll_state::process_event_batch(const std::ranges::subrange<const SDL
 				break;
 			case SDL_CONTROLLERDEVICEADDED:
 				joy_init();
-				break;
+				continue;
 			case SDL_CONTROLLERDEVICEREMOVED:
 				joy_close();
 				joy_init();
-				break;
+				continue;
 			case SDL_CONTROLLERBUTTONDOWN:
 			case SDL_CONTROLLERBUTTONUP:
 				if (CGameArg.CtlNoJoystick)

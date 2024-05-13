@@ -355,8 +355,9 @@ void joy_init()
 	range_for (const unsigned i, xrange(n))
 	{
 		auto &joystick = SDL_GameControllers[num_joysticks];
-		const auto handle = SDL_GameControllerGetJoystick(SDL_GameControllerOpen(i));
-		//joystick.handle().reset(handle);
+		const auto gc = SDL_GameControllerOpen(i);
+		joystick.handle().reset(gc);
+		const auto handle = SDL_GameControllerGetJoystick(gc);
 #if SDL_MAJOR_VERSION == 1
 		con_printf(CON_NORMAL, "sdl-joystick %d: %s", i, SDL_JoystickName(i));
 #else
@@ -379,7 +380,8 @@ void joy_init()
             const auto n_axes = 0;
 #endif
 
-			const auto n_buttons = check_warn_joy_support_limit(SDL_JoystickNumButtons(handle), "button", DXX_MAX_BUTTONS_PER_JOYSTICK);
+			// +1 comes the below call returning 14 but we have at least 15 buttons on an xbox controller
+			const auto n_buttons = check_warn_joy_support_limit(SDL_JoystickNumButtons(handle), "button", DXX_MAX_BUTTONS_PER_JOYSTICK) + 1;
 			const auto n_hats = check_warn_joy_support_limit(SDL_JoystickNumHats(handle), "hat", DXX_MAX_HATS_PER_JOYSTICK);
 
 			const auto n_virtual_buttons = n_buttons + (4 * n_hats) + (2 * n_axes);
@@ -418,6 +420,7 @@ void joy_init()
 				snprintf(&joybutton_text[joystick_n_buttons++][0], sizeof(joybutton_text[0]), "J%u H%u%c", i + 1, idx, 0201);
 			}
 #endif
+
 #if DXX_MAX_AXES_PER_JOYSTICK
 			for (auto &&[idx, value] : enumerate(partial_range(joystick.axis_button_map(), n_axes), 1))
 			{

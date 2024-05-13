@@ -201,15 +201,15 @@ int mix_play_file(const char *filename, int loop, void (*const entry_hook_finish
 	// It's a .hmp!
 	if (const auto fptr = strrchr(filename, '.'); fptr && !d_stricmp(fptr, ".hmp"))
 	{
-		char* hmq_filename = (char*)malloc(strlen(filename) + 1);
+		char* hmq_filename = static_cast<char*>(malloc(strlen(filename) + 1));
 		strcpy(hmq_filename, filename);
 		hmq_filename[strlen(hmq_filename) - 1] = 'q'; // Change hmp -> hmq
 
-		// TODO: Set to always false if adlmidi isn't in use
-		bool hmq_exists = PHYSFSX_exists(hmq_filename, 1);
+		bool hmq_exists = CGameCfg.ADLMIDI_enabled && PHYSFSX_exists(hmq_filename, 1);
 
 		// Update bank to use for adlmidi
-		switch_bank(filename);
+		if (hmq_exists)
+			switch_bank(filename);
 
 		if (auto &&[v, hoe] = hmp2mid(hmq_exists ? hmq_filename : filename); hoe == hmp_open_error::None)
 		{

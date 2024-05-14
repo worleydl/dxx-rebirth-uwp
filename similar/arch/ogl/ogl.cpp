@@ -1415,14 +1415,9 @@ void ogl_end_frame(void){
 
 void gr_flip(void)
 {
-    // Copy offscreen render to screen
 	int dispW, dispH;
 	SDL_GL_GetDrawableSize(g_pRebirthSDLMainWindow, &dispW, &dispH);
 
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, 1);
-	glBlitFramebuffer(0, 0, grd_curscreen->get_screen_width(), grd_curscreen->get_screen_height(), 0, 0, dispW, dispH, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-	//glBlitNamedFramebuffer(1, 0, 0, 0, 800, 600, 0, 0, 800, 600, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 	if (CGameArg.DbgRenderStats)
 	{
 		gr_set_default_canvas();
@@ -1430,6 +1425,12 @@ void gr_flip(void)
 	}
 
 	ogl_do_palfx();
+
+	// Copy framebuffer to screen
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 1);
+	glBlitFramebuffer(0, 0, grd_curscreen->get_screen_width(), grd_curscreen->get_screen_height(), 0, 0, dispW, dispH, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
 	ogl_swap_buffers_internal();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT);

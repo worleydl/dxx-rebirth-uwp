@@ -88,7 +88,7 @@ struct compare_str
 {
 	bool operator()(char const* a, char const* b) const
 	{
-		return std::strcmp(a, b);
+		return std::strcmp(a, b) < 0;
 	}
 };
 std::map<const char*, int, compare_str> adl_song_banks = {
@@ -141,9 +141,9 @@ static ADL_MIDIPlayer *get_adlmidi()
 		adlmidi = adl_init(sample_rate);
 		if (adlmidi)
 		{
-			adl_switchEmulator(adlmidi, ADLMIDI_EMU_DOSBOX);
-			//adl_setNumChips(adlmidi, CGameCfg.ADLMIDI_num_chips);
-			adl_setBank(adlmidi, CGameCfg.ADLMIDI_bank);
+			adl_switchEmulator(adlmidi, 0);
+			adl_setNumChips(adlmidi, 1);
+			//adl_setBank(adlmidi, CGameCfg.ADLMIDI_bank);
 			adl_setSoftPanEnabled(adlmidi, 1);
 			adl_setChannelAllocMode(adlmidi, ADLMIDI_ChanAlloc_AnyReleased);
 			adl_setVolumeRangeModel(adlmidi, ADLMIDI_VolumeModel_HMI);
@@ -156,8 +156,9 @@ static ADL_MIDIPlayer *get_adlmidi()
 static void switch_bank(const char* filename) {
 	auto adlmidi = get_adlmidi(); // Hacky, need to init sooner
 
+	int next_bank = adl_song_banks[filename];
 	//adl_setNumChips(adlmidi, CGameCfg.ADLMIDI_num_chips);
-	adl_setBank(adlmidi, adl_song_banks[filename]);
+	adl_setBank(adlmidi, next_bank);
 	adl_reset(adlmidi);
 
 }
@@ -208,8 +209,15 @@ int mix_play_file(const char *filename, int loop, void (*const entry_hook_finish
 		bool hmq_exists = CGameCfg.ADLMIDI_enabled && PHYSFSX_exists(hmq_filename, 1);
 
 		// Update bank to use for adlmidi
-		if (hmq_exists)
+		if (CGameCfg.ADLMIDI_enabled)
 			switch_bank(filename);
+
+// To debug specific tracks on launch, uncomment the switch_bank below and replace hmp2mid arg with HMP/HMQ var
+#define DEBUG_TRK "briefing"
+#define DEBUG_TRK_HMP DEBUG_TRK ".hmp"
+#define DEBUG_TRK_HMQ DEBUG_TRK ".hmq"
+
+		//switch_bank(DEBUG_TRK_HMP);
 
 		if (auto &&[v, hoe] = hmp2mid(hmq_exists ? hmq_filename : filename); hoe == hmp_open_error::None)
 		{

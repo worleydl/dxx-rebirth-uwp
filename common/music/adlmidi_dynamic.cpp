@@ -73,7 +73,7 @@ static bool load_function(const HMODULE handle, const char *const name, F *&fptr
 static ADL_MIDIPlayer *adl_init_first_call(long sample_rate)
 {
 #if defined(_WIN32)
-	const char *library_name = "libADLMIDI.dll";
+	const char *library_name = "ADLMIDI.dll";
 #elif defined(__APPLE__)
 	const char *library_name = "libADLMIDI.dylib";
 #else

@@ -132,11 +132,8 @@ typedef std::unique_ptr<grs_main_bitmap> grs_bitmap_ptr;
 
 struct grs_font;
 
-#if SDL_MAJOR_VERSION == 1
 uint_fast32_t gr_list_modes(std::array<screen_mode, 50> &modes);
-#elif SDL_MAJOR_VERSION == 2
 extern SDL_Window *g_pRebirthSDLMainWindow;
-#endif
 
 }
 

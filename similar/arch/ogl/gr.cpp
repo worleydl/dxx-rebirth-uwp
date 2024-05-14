@@ -684,6 +684,31 @@ uint_fast32_t gr_list_modes(std::array<screen_mode, 50> &gsmodes)
 		return modesnum;
 	}
 }
+#else
+uint_fast32_t gr_list_modes(std::array<screen_mode, 50> &gsmodes)
+{
+	SDL_DisplayMode mode;
+
+	int num_modes = SDL_GetNumDisplayModes(0);
+	int added_modes = 0;
+	int last_width = 0;
+	for(int i = 0; i < num_modes; i++)
+	{
+		SDL_GetDisplayMode(0, i, &mode);
+
+		if (last_width != mode.w)
+		{
+			gsmodes[added_modes].width = mode.w;
+			gsmodes[added_modes++].height = mode.h;
+			last_width = mode.w;
+		}
+
+		if (added_modes >= gsmodes.size())
+			break;
+	}
+
+	return added_modes;
+}
 #endif
 
 }

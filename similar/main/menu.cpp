@@ -1124,7 +1124,6 @@ struct screen_resolution_menu_items
 	enum class ni_index : unsigned;
 	enum class fixed_field_index : unsigned
 	{
-#if SDL_MAJOR_VERSION == 1
 		/* SDL1 has a variable number of records before this line, so
 		 * this line exists to separate them from the next lines.
 		 *
@@ -1132,7 +1131,6 @@ struct screen_resolution_menu_items
 		 * separator is needed.
 		 */
 		opt_blank_custom_values,
-#endif
 		opt_radio_custom_values,
 		opt_label_resolution,
 		opt_input_resolution,
@@ -1145,7 +1143,6 @@ struct screen_resolution_menu_items
 		 */
 		end,
 	};
-#if SDL_MAJOR_VERSION == 1
 	static constexpr std::size_t maximum_preset_modes = 50;
 	std::array<screen_mode, maximum_preset_modes> modes;
 	std::array<std::array<char, 12>, maximum_preset_modes> restext;
@@ -1154,25 +1151,15 @@ struct screen_resolution_menu_items
 	{
 		return static_cast<ni_index>(static_cast<unsigned>(i) + num_presets);
 	}
-#elif SDL_MAJOR_VERSION == 2
-	static constexpr std::size_t maximum_preset_modes = 0;
-	static constexpr ni_index convert_fixed_field_to_ni(fixed_field_index i)
-	{
-		return static_cast<ni_index>(i);
-	}
-#endif
 	std::array<char, 12> crestext, casptext;
 	enumerated_array<newmenu_item, maximum_preset_modes + static_cast<unsigned>(fixed_field_index::end), ni_index> m;
 	screen_resolution_menu_items();
 };
 
 screen_resolution_menu_items::screen_resolution_menu_items()
-#if SDL_MAJOR_VERSION == 1
 	: num_presets(gr_list_modes(modes))
-#endif
 {
 	int citem = -1;
-#if SDL_MAJOR_VERSION == 1
 	for (auto &&[idx, mode, resolution_text, menuitem] : enumerate(zip(partial_const_range(modes, num_presets), restext, m)))
 	{
 		const auto &&sm_w = SM_W(mode);
@@ -1188,7 +1175,6 @@ screen_resolution_menu_items::screen_resolution_menu_items()
 	}
 	/* Leave a blank line for visual separation */
 	nm_set_item_text(m[convert_fixed_field_to_ni(fixed_field_index::opt_blank_custom_values)], "");
-#endif
 	nm_set_item_radio(m[convert_fixed_field_to_ni(fixed_field_index::opt_radio_custom_values)], "Use custom values", (citem == -1), grp_resolution);
 	nm_set_item_text(m[convert_fixed_field_to_ni(fixed_field_index::opt_label_resolution)], "resolution:");
 	snprintf(crestext.data(), crestext.size(), "%ix%i", SM_W(Game_screen_mode), SM_H(Game_screen_mode));
@@ -1208,9 +1194,7 @@ struct screen_resolution_menu : screen_resolution_menu_items, passive_newmenu
 	}
 	virtual window_event_result event_handler(const d_event &event) override;
 	void handle_close_event() const;
-#if SDL_MAJOR_VERSION == 1
 	void check_apply_preset_resolution() const;
-#endif
 	void apply_custom_resolution() const;
 	void apply_resolution(screen_mode) const;
 };
@@ -1230,7 +1214,6 @@ window_event_result screen_resolution_menu::event_handler(const d_event &event)
 void screen_resolution_menu::handle_close_event() const
 {
 	// check which resolution field was selected
-#if SDL_MAJOR_VERSION == 1
 	if (m[convert_fixed_field_to_ni(fixed_field_index::opt_checkbox_fullscreen)].value != gr_check_fullscreen())
 		gr_toggle_fullscreen();
 	if (!m[convert_fixed_field_to_ni(fixed_field_index::opt_radio_custom_values)].value)
@@ -1242,13 +1225,11 @@ void screen_resolution_menu::handle_close_event() const
 		check_apply_preset_resolution();
 	}
 	else
-#endif
 	{
 		apply_custom_resolution();
 	}
 }
 
-#if SDL_MAJOR_VERSION == 1
 void screen_resolution_menu::check_apply_preset_resolution() const
 {
 	const auto r = zip(partial_range(modes, num_presets), m);
@@ -1270,7 +1251,6 @@ void screen_resolution_menu::check_apply_preset_resolution() const
 	CGameCfg.AspectX = SM_H(requested_mode) / g;
 	apply_resolution(requested_mode);
 }
-#endif
 
 void screen_resolution_menu::apply_custom_resolution() const
 {

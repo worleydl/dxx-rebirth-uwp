@@ -35,7 +35,7 @@ namespace {
 
 //changed on 980905 by adb to increase number of concurrent sounds
 //end changes by adb
-#define SOUND_BUFFER_SIZE 2048
+#define SOUND_BUFFER_SIZE 4096
 
 #define MIN_VOLUME 10
 

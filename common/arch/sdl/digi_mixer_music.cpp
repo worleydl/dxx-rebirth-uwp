@@ -212,12 +212,13 @@ int mix_play_file(const char *filename, int loop, void (*const entry_hook_finish
 		if (CGameCfg.ADLMIDI_enabled)
 			switch_bank(filename);
 
-// To debug specific tracks on launch, uncomment the switch_bank below and replace hmp2mid arg with HMP/HMQ var
-#define DEBUG_TRK "briefing"
+// To debug specific tracks on launch, uncomment the define and update hmp2mid to point at DEBUG_TRK_*
+//#define DEBUG_TRK "game05"
+#ifdef DEBUG_TRK
 #define DEBUG_TRK_HMP DEBUG_TRK ".hmp"
 #define DEBUG_TRK_HMQ DEBUG_TRK ".hmq"
-
-		//switch_bank(DEBUG_TRK_HMP);
+switch_bank(DEBUG_TRK_HMP);
+#endif
 
 		if (auto &&[v, hoe] = hmp2mid(hmq_exists ? hmq_filename : filename); hoe == hmp_open_error::None)
 		{

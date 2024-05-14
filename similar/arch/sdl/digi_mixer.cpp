@@ -55,7 +55,7 @@ namespace {
 #if !((defined(__APPLE__) && defined(__MACH__)) || defined(macintosh))
 constexpr std::size_t SOUND_BUFFER_SIZE{2048};
 #else
-constexpr std::size_t SOUND_BUFFER_SIZE{1024};
+constexpr std::size_t SOUND_BUFFER_SIZE{4096};
 #endif
 
 constexpr uint16_t MIX_OUTPUT_FORMAT{AUDIO_S16};

@@ -94,6 +94,7 @@ Cfg GameCfg;
 int ReadConfigFile()
 {
 	// set defaults
+	CGameCfg.ADLMIDI_enabled = 1;
 	CGameCfg.DigiVolume = 8;
 	CGameCfg.MusicVolume = 8;
 	CGameCfg.ReverseStereo = false;

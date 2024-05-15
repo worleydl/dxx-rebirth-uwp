@@ -1,0 +1,14 @@
+BUILDING
+===============
+I'm slightly new to building things for UWP and even more inexperienced with scons.  Sorry for the headache but to build you need a clean mingw environment.  If you've installed SDL2 previously it may collide.
+
+Clone and build SDL2_image/SDL2_mixer/libpng with cmake using a WindowsStore configuration.  Update path in SConstruct accordingly.
+
+You will need to build aerisarns mesa-uwp/SDL-uwp-gl projects and update the paths for those dependencies.
+
+You can now build the main dll used in the UWP application with the following command:
+`time nice scons -j$(nproc) sdl2=1 d1x=1 CXX=x86_64-w64-mingw32-g++ adlmidi=runtime`
+
+Once the DLL is built, update the UWP project file with paths to your mingw dll's and custom built dlls.  From there you can build the app and run it.
+
+My builds are purposefully left with a bit of headache to discourage thievery and pushes to retail.  Apologies in advance.  I can assist with official adoptations with a cleaner config if desired.

@@ -65,6 +65,7 @@ struct CCfg : prohibit_void_ptr<CCfg>
 	int ADLMIDI_bank = 31;
 	bool ADLMIDI_enabled;
 #endif
+	int fboScale = 10;
 	bool VSync;
 	bool Grabinput;
 	bool WindowMode;

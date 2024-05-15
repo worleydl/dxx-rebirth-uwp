@@ -1131,6 +1131,8 @@ struct screen_resolution_menu_items
 		 * separator is needed.
 		 */
 		opt_blank_custom_values,
+		opt_radio_scaled_fbo,
+		opt_slider_fbo_scale,
 		opt_radio_custom_values,
 		opt_label_resolution,
 		opt_input_resolution,
@@ -1152,6 +1154,7 @@ struct screen_resolution_menu_items
 		return static_cast<ni_index>(static_cast<unsigned>(i) + num_presets);
 	}
 	std::array<char, 12> crestext, casptext;
+	ntstring<255> slider_val;
 	enumerated_array<newmenu_item, maximum_preset_modes + static_cast<unsigned>(fixed_field_index::end), ni_index> m;
 	screen_resolution_menu_items();
 };
@@ -1160,6 +1163,8 @@ screen_resolution_menu_items::screen_resolution_menu_items()
 	: num_presets(gr_list_modes(modes))
 {
 	int citem = -1;
+	memset(slider_val.data(), 0, 255);
+
 	for (auto &&[idx, mode, resolution_text, menuitem] : enumerate(zip(partial_const_range(modes, num_presets), restext, m)))
 	{
 		const auto &&sm_w = SM_W(mode);
@@ -1175,6 +1180,8 @@ screen_resolution_menu_items::screen_resolution_menu_items()
 	}
 	/* Leave a blank line for visual separation */
 	nm_set_item_text(m[convert_fixed_field_to_ni(fixed_field_index::opt_blank_custom_values)], "");
+	nm_set_item_radio(m[convert_fixed_field_to_ni(fixed_field_index::opt_radio_scaled_fbo)], "Framebuffer Scaler", (citem == 99), grp_resolution);
+	nm_set_item_slider(m[convert_fixed_field_to_ni(fixed_field_index::opt_slider_fbo_scale)], "%", CGameCfg.fboScale, 2, 10, slider_val);
 	nm_set_item_radio(m[convert_fixed_field_to_ni(fixed_field_index::opt_radio_custom_values)], "Use custom values", (citem == -1), grp_resolution);
 	nm_set_item_text(m[convert_fixed_field_to_ni(fixed_field_index::opt_label_resolution)], "resolution:");
 	snprintf(crestext.data(), crestext.size(), "%ix%i", SM_W(Game_screen_mode), SM_H(Game_screen_mode));
@@ -1195,7 +1202,8 @@ struct screen_resolution_menu : screen_resolution_menu_items, passive_newmenu
 	virtual window_event_result event_handler(const d_event &event) override;
 	void handle_close_event() const;
 	void check_apply_preset_resolution() const;
-	void apply_custom_resolution() const;
+	void apply_custom_resolution(const char*, const char*) const;
+	void apply_fbo_resolution() const;
 	void apply_resolution(screen_mode) const;
 };
 
@@ -1216,7 +1224,11 @@ void screen_resolution_menu::handle_close_event() const
 	// check which resolution field was selected
 	if (m[convert_fixed_field_to_ni(fixed_field_index::opt_checkbox_fullscreen)].value != gr_check_fullscreen())
 		gr_toggle_fullscreen();
-	if (!m[convert_fixed_field_to_ni(fixed_field_index::opt_radio_custom_values)].value)
+	if (m[convert_fixed_field_to_ni(fixed_field_index::opt_radio_scaled_fbo)].value)
+	{
+		apply_fbo_resolution();
+	}
+	else if (!m[convert_fixed_field_to_ni(fixed_field_index::opt_radio_custom_values)].value)
 	{
 		/* If the radio item for "Use custom resolution" is not set,
 		 * then one of the items for a preset resolution must be set.
@@ -1226,7 +1238,7 @@ void screen_resolution_menu::handle_close_event() const
 	}
 	else
 	{
-		apply_custom_resolution();
+		apply_custom_resolution(crestext.data(), casptext.data());
 	}
 }
 
@@ -1252,15 +1264,41 @@ void screen_resolution_menu::check_apply_preset_resolution() const
 	apply_resolution(requested_mode);
 }
 
-void screen_resolution_menu::apply_custom_resolution() const
+// Calculates scaled resolution then forwards that to custom resolution settings
+void screen_resolution_menu::apply_fbo_resolution() const
+{
+	const auto scale = m[convert_fixed_field_to_ni(fixed_field_index::opt_slider_fbo_scale)].value;
+	CGameCfg.fboScale = scale;
+
+	// Full buffer will be 4k which is okay even on lower end devices for this title
+	const int full_width = 3840;
+	const int full_height = 2160;
+
+	const int scaled_width = full_width * (static_cast<float>(scale) / 10);
+	const int scaled_height = full_height * (static_cast<float>(scale) / 10);
+
+	const auto g = gcd(scaled_width, scaled_height);
+	const int x_asp = scaled_width / g;
+	const int y_asp = scaled_height / g;
+
+	char restex[32];
+	char asptex[32];
+
+	snprintf(restex, crestext.size(), "%ix%i", scaled_width, scaled_height);
+	snprintf(asptex, casptext.size(), "%ix%i", x_asp, y_asp);
+
+	apply_custom_resolution(restex, asptex);
+}
+
+void screen_resolution_menu::apply_custom_resolution(const char* restex, const char* asptex) const
 {
 	char *x;
 	const char *errstr;
-	const auto resolution_width = strtoul(crestext.data(), &x, 10);
+	const auto resolution_width = strtoul(restex, &x, 10);
 	unsigned long resolution_height;
 	screen_mode cmode;
 	if (
-		((x == crestext.data() || *x != 'x' || !x[1] || ((resolution_height = strtoul(x + 1, &x, 10)), *x)) && (errstr = "Entered resolution must\nbe formatted as\n<number>x<number>", true)) ||
+		((x == restex || *x != 'x' || !x[1] || ((resolution_height = strtoul(x + 1, &x, 10)), *x)) && (errstr = "Entered resolution must\nbe formatted as\n<number>x<number>", true)) ||
 		((resolution_width < 320 || resolution_height < 200) && (errstr = "Entered resolution must\nbe at least 320x200", true))
 	)
 	{
@@ -1288,10 +1326,10 @@ void screen_resolution_menu::apply_custom_resolution() const
 		cmode.height = resolution_height;
 	}
 	screen_mode casp;
-	const auto aspect_width = strtoul(casptext.data(), &x, 10);
+	const auto aspect_width = strtoul(asptex, &x, 10);
 	unsigned long aspect_height;
 	if (
-		((x == casptext.data() || *x != 'x' || !x[1] || ((aspect_height = strtoul(x + 1, &x, 10)), *x)) && (errstr = "Entered aspect ratio must\nbe formatted as\n<number>x<number>", true)) ||
+		((x == asptex || *x != 'x' || !x[1] || ((aspect_height = strtoul(x + 1, &x, 10)), *x)) && (errstr = "Entered aspect ratio must\nbe formatted as\n<number>x<number>", true)) ||
 		((!aspect_width || !aspect_height) && (errstr = "Entered aspect ratio must\nnot use 0 term", true))
 	)
 	{

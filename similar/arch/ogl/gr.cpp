@@ -104,25 +104,10 @@ enum { sdl_no_modeswitch = 0 };
 
 namespace dsx {
 
-#if SDL_MAJOR_VERSION == 1
 void gr_set_mode_from_window_size()
 {
 	gr_set_mode(Game_screen_mode);
 }
-#elif SDL_MAJOR_VERSION == 2
-static void gr_set_mode_from_window_size(SDL_Window *const SDLWindow)
-{
-	assert(SDLWindow);
-	int w, h;
-	SDL_GL_GetDrawableSize(SDLWindow, &w, &h);
-	gr_set_mode(screen_mode(w, h));
-}
-
-void gr_set_mode_from_window_size()
-{
-	gr_set_mode_from_window_size(g_pRebirthSDLMainWindow);
-}
-#endif
 
 }
 
@@ -550,19 +535,7 @@ void gr_toggle_fullscreen()
 	}
 	CGameCfg.WindowMode = !(local_sdl_video_flags & SDL_FULLSCREEN);
 #elif SDL_MAJOR_VERSION == 2
-	const auto SDLWindow = g_pRebirthSDLMainWindow;
-	const auto is_fullscreen_before_change = SDL_GetWindowFlags(SDLWindow) & SDL_WINDOW_FULLSCREEN;
-	CGameCfg.WindowMode = !!is_fullscreen_before_change;
-	if (!is_fullscreen_before_change)
-		SDL_GetWindowPosition(SDLWindow, &g_iRebirthWindowX, &g_iRebirthWindowY);
-	SDL_SetWindowFullscreen(SDLWindow, is_fullscreen_before_change ? 0 : SDL_WINDOW_FULLSCREEN_DESKTOP);
-	if (is_fullscreen_before_change)
-	{
-		const auto mode = Game_screen_mode;
-		SDL_SetWindowPosition(SDLWindow, g_iRebirthWindowX, g_iRebirthWindowY);
-		SDL_SetWindowSize(SDLWindow, SM_W(mode), SM_H(mode));
-	}
-	gr_set_mode_from_window_size(SDLWindow);
+	gr_set_mode_from_window_size();
 #endif
 }
 
